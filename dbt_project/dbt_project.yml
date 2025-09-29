@@ -1,0 +1,14 @@
+
+name: 'attach_rate_dbt'
+version: '1.0'
+config-version: 2
+
+profile: 'databricks'
+
+models:
+  attach_rate_dbt:
+    +materialized: view
+    staging:
+      +schema: silver
+    marts:
+      +schema: gold

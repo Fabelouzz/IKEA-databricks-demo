@@ -1,0 +1,26 @@
+
+version: 2
+
+models:
+  - name: stg_transactions
+    columns:
+      - name: receipt_id
+        tests: [not_null]
+      - name: product_id
+        tests: [not_null]
+      - name: ts
+        tests: [not_null]
+  - name: stg_products
+    columns:
+      - name: product_id
+        tests: [not_null, unique]
+      - name: family
+        tests: [not_null]
+      - name: size_class
+        tests: [not_null]
+  - name: fct_attach_rate
+    columns:
+      - name: date
+        tests: [not_null]
+      - name: anchor_family
+        tests: [not_null]
