@@ -33,7 +33,9 @@ FROM den d
 LEFT JOIN num n ON d.anchor_family = n.anchor_family AND d.date = n.date;
 
 -- Global add-on baseline probability
-CREATE OR REPLACE TEMP VIEW addon_baseline AS
+CREATE SCHEMA IF NOT EXISTS gold;
+
+CREATE OR REPLACE VIEW gold.addon_baseline AS
 SELECT p.product_id,
        p.family AS addon_family,
        SUM(t.qty) AS total_qty,
@@ -73,7 +75,7 @@ SELECT a.anchor_family, a.product_id, a.addon_family,
        CASE WHEN bl.p_addon > 0 THEN (a.addon_receipts / d.anchor_receipts) / bl.p_addon ELSE NULL END AS lift
 FROM addon_events a
 JOIN den d ON a.anchor_family = d.anchor_family
-JOIN addon_baseline bl ON a.product_id = bl.product_id;
+JOIN gold.addon_baseline bl ON a.product_id = bl.product_id;
 
 -- Restaurant conversion among anchor customers same day
 CREATE OR REPLACE VIEW gold.restaurant_conv AS

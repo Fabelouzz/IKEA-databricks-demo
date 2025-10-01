@@ -6,19 +6,44 @@
 
 # COMMAND ----------
 
+from pathlib import Path
+
+
+def resolve_repo_root() -> Path:
+    try:
+        return Path(__file__).resolve().parents[1]
+    except NameError:
+        try:
+            nb_path = (dbutils.notebook.entry_point.getDbutils()  # type: ignore[name-defined]
+                       .notebook().getContext().notebookPath().get())
+            workspace_path = Path("/Workspace") / nb_path.lstrip("/")
+            # Notebook path usually: /Workspace/Repos/<user>/<repo>/files/notebooks/02_...
+            # Take two parents to land in .../files
+            return workspace_path.parents[1]
+        except Exception:
+            return Path.cwd().resolve()
+
+repo_root = resolve_repo_root()
+if 'dbutils' in globals():
+    data_path = f"dbfs:{repo_root.as_posix()}/data_seed"
+else:
+    data_path = (repo_root / "data_seed").as_posix()
+
+print(f"📂 Reading seed data from: {data_path}")
+
+# Create schemas
 spark.sql("CREATE SCHEMA IF NOT EXISTS bronze")
 spark.sql("CREATE SCHEMA IF NOT EXISTS silver")
 spark.sql("CREATE SCHEMA IF NOT EXISTS gold")
 
-repo_root = spark.sql("SELECT regexp_replace(current_user(), '@.*', '')").collect()[0][0]  # placeholder
-
-# Infer path from notebook context if running in Repo
-import os
-from pathlib import Path
-nb_path = os.getcwd()
-repo_dir = "/Workspace" if "/Workspace" in nb_path else "/"
-# For demo, adjust to your repo Files path
-data_path = "../data_seed"  # edit if needed
+# Verify files exist and show sizes
+try:
+    files = dbutils.fs.ls(data_path)
+    print(f"\n📁 CSV files found:")
+    for f in files:
+        print(f"   {f.name}: {f.size:,} bytes")
+except:
+    print("⚠️  Could not list files (running locally?)")
 
 # COMMAND ----------
 

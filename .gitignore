@@ -1,0 +1,222 @@
+# ============================================
+# SECRETS AND CREDENTIALS
+# ============================================
+
+# Environment variables and secrets
+.env
+.env.*
+*.env
+.envrc
+secrets.yml
+secrets.yaml
+secrets.json
+config.secret.*
+
+# API Keys and Tokens
+*.key
+*.pem
+*.p12
+*.pfx
+*.der
+*.crt
+*.cer
+*_rsa
+*_rsa.pub
+*_dsa
+*_dsa.pub
+*_ecdsa
+*_ecdsa.pub
+*_ed25519
+*_ed25519.pub
+
+# Credentials files
+*credentials*
+*secrets*
+*password*
+*token*
+*.token
+auth.json
+auth.yml
+auth.yaml
+service-account*.json
+
+# ============================================
+# DATABRICKS SPECIFIC
+# ============================================
+
+.databricks
+.databrickscfg
+databricks.cfg
+databricks-token
+*.databricks-token
+
+# Databricks CLI config
+~/.databrickscfg
+
+# ============================================
+# CLOUD PROVIDER CREDENTIALS
+# ============================================
+
+# AWS
+.aws/
+aws-exports.js
+awsconfiguration.json
+**/aws-credentials*
+*.pem
+
+# Azure
+azure.conf
+.azure/
+*.publishsettings
+
+# GCP
+gcp-key.json
+**/gcloud/
+service-account.json
+google-credentials.json
+*-service-account-key.json
+
+# ============================================
+# DATABASE CONNECTION STRINGS
+# ============================================
+
+# Database configs
+database.ini
+database.yml
+database.yaml
+db.config
+connection-string*
+jdbc.properties
+odbc.ini
+
+# ============================================
+# PYTHON SPECIFIC
+# ============================================
+
+# Virtual environments
+venv/
+env/
+ENV/
+.venv
+*.virtualenv
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Distribution / packaging
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Jupyter Notebook
+.ipynb_checkpoints
+*/.ipynb_checkpoints/*
+
+# IPython
+profile_default/
+ipython_config.py
+
+# pyenv
+.python-version
+
+# ============================================
+# IDE AND EDITOR FILES
+# ============================================
+
+# VSCode
+.vscode/settings.json
+.vscode/launch.json
+.vscode/*.json
+!.vscode/extensions.json
+!.vscode/tasks.json
+
+# JetBrains IDEs
+.idea/
+*.iml
+*.iws
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# ============================================
+# OPERATING SYSTEM FILES
+# ============================================
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Linux
+*~
+.directory
+
+# ============================================
+# LOG FILES AND TEMPORARY DATA
+# ============================================
+
+# Logs
+*.log
+logs/
+*.log.*
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Temporary files
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+.cache/
+tmp/
+temp/
+
+# ============================================
+# CUSTOM / PROJECT SPECIFIC
+# ============================================
+
+# Any file with 'private' in the name
+*private*
+*PRIVATE*
+
+# Local configuration overrides
+*.local
+local_settings.py
+local_config.*
+
+# Backup files
+*.bak
+*.backup
+*.old
+
+# Data files that might contain sensitive information
+# (Uncomment if needed - currently allowing data_seed/ for demo purposes)
+# data_seed/*_private*
+# *.csv.private
+# *.parquet.private

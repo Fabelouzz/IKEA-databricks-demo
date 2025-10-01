@@ -1,0 +1,15 @@
+# This is a Databricks asset bundle definition for IKEA-demo.
+# The Databricks extension requires databricks.yml configuration file.
+# See https://docs.databricks.com/dev-tools/bundles/index.html for documentation.
+
+bundle:
+  name: IKEA-demo
+
+targets:
+  dev:
+    mode: development
+    default: true
+    workspace:
+      host: https://dbc-dbc62570-5a7c.cloud.databricks.com
+      # Where bundle resources live (jobs, etc.)
+      root_path: /Workspace/Repos/${workspace.current_user.userName}/IKEA-DEMO

@@ -6,13 +6,36 @@
 # MAGIC Save as CSV in the repo `data_seed/` for ingestion.
 
 # COMMAND ----------
-
+# FAUGEN
 import pandas as pd, numpy as np
 from datetime import datetime, timedelta
 from pathlib import Path
 
-repo_root = Path(__file__).resolve().parents[1]
-out = repo_root / "data_seed"
+
+def _workspace_repo_root() -> Path:
+    try:
+        nb_path = (dbutils.notebook.entry_point.getDbutils()  # type: ignore[name-defined]
+                   .notebook().getContext().notebookPath().get())
+        workspace_path = Path("/Workspace") / nb_path.lstrip("/")
+        # Notebook lives under .../files/notebooks/<name>
+        return workspace_path.parents[1]
+    except Exception:
+        return Path.cwd().resolve()
+
+
+try:
+    repo_root = Path(__file__).resolve().parents[1]
+    env = "local"
+except NameError:
+    repo_root = _workspace_repo_root()
+    env = "databricks"
+
+if env == "databricks":
+    dbfs_root = Path("/dbfs").joinpath(*repo_root.parts[1:])
+    out_base = dbfs_root
+else:
+    out_base = repo_root
+out = out_base / "data_seed"
 out.mkdir(exist_ok=True, parents=True)
 
 np.random.seed(42)
@@ -21,10 +44,52 @@ days = 60
 start_date = datetime.now() - timedelta(days=days)
 store_id = 1101
 
+# Visit distribution across open hours (normalized to 1.0 for numpy>=1.26 strictness)
+hour_choices = np.arange(10, 20)
+hour_weights = np.array([0.04, 0.05, 0.06, 0.08, 0.12, 0.15, 0.16, 0.14, 0.10, 0.10], dtype=float)
+hour_probs = hour_weights / hour_weights.sum()
+
 # Product catalog
 families = ["SOFAS","BEDS","WARDROBES","TABLES","CHAIRS","LAMPS","TEXTILES","KITCHENWARE","DECOR","STORAGE"]
 size_class = {"SOFAS":"LARGE","BEDS":"LARGE","WARDROBES":"LARGE","TABLES":"LARGE",
               "CHAIRS":"SMALL","LAMPS":"SMALL","TEXTILES":"SMALL","KITCHENWARE":"SMALL","DECOR":"SMALL","STORAGE":"SMALL"}
+
+# Anchor-specific add-on preferences (creates learnable ML patterns!)
+# Using EXTREME weights (10-50x difference) to create clear patterns
+anchor_addon_prefs = {
+    "SOFAS": {
+        "LAMPS": 10.0,      # Floor/table lamps for living room (STRONG!)
+        "TEXTILES": 9.0,    # Cushions, throws (STRONG!)
+        "DECOR": 7.0,       # Wall art, vases
+        "STORAGE": 3.0,     # TV units, side tables
+        "KITCHENWARE": 0.5,
+        "CHAIRS": 0.5
+    },
+    "BEDS": {
+        "TEXTILES": 15.0,   # Bedding, pillows (HIGHEST!)
+        "LAMPS": 8.0,       # Bedside lamps
+        "STORAGE": 6.0,     # Under-bed storage
+        "DECOR": 2.0,
+        "CHAIRS": 0.3,
+        "KITCHENWARE": 0.2
+    },
+    "WARDROBES": {
+        "STORAGE": 12.0,    # Organizers, boxes (STRONG!)
+        "CHAIRS": 5.0,      # Bedroom chairs
+        "TEXTILES": 4.0,    # Hangers count as textiles
+        "LAMPS": 2.0,
+        "DECOR": 1.0,
+        "KITCHENWARE": 0.3
+    },
+    "TABLES": {
+        "CHAIRS": 15.0,     # Dining chairs (HIGHEST!)
+        "KITCHENWARE": 10.0,# Plates, utensils for dining (STRONG!)
+        "DECOR": 5.0,       # Centerpieces
+        "TEXTILES": 2.0,    # Tablecloths
+        "LAMPS": 1.0,
+        "STORAGE": 0.5
+    }
+}
 
 rows = []
 pid = 1000
@@ -62,21 +127,55 @@ for d in range(days):
         basket_size = np.random.choice([1,2,3,4,5], p=[0.3,0.3,0.2,0.15,0.05])
         lid = np.random.randint(1, len(loyalty)+1)
         # time of day
-        hour = np.random.choice(range(10,20), p=[0.04,0.05,0.06,0.08,0.12,0.15,0.16,0.14,0.1,0.06])
+        hour = np.random.choice(hour_choices, p=hour_probs)
         minute = np.random.randint(0,60)
         ts = datetime(day.year, day.month, day.day, hour, minute, 0)
-        # chance of an anchor item
-        has_anchor = np.random.rand() < 0.18
+        # chance of an anchor item (35% - IKEA's big purchases drive traffic)
+        has_anchor = np.random.rand() < 0.35
         items = []
         if has_anchor:
-            fam = np.random.choice(["SOFAS","BEDS","WARDROBES","TABLES"])
-            anchor_pid = products[products.family==fam].sample(1).product_id.values[0]
+            anchor_fam = np.random.choice(["SOFAS","BEDS","WARDROBES","TABLES"])
+            anchor_pid = products[products.family==anchor_fam].sample(1).product_id.values[0]
             items.append(anchor_pid)
-            # add-on count
-            addon_n = np.random.choice([0,1,2,3], p=[0.4,0.35,0.2,0.05])
-            small_pool = products[products.size_class=="SMALL"].product_id.values
+            
+            # add-on count (IKEA customers buy MANY small items!)
+            # Slightly fewer to make patterns clearer
+            addon_n = np.random.choice([1,2,3,4], p=[0.20,0.40,0.30,0.10])
+            
+            # Select add-ons based on anchor preferences (creates ML patterns!)
+            addon_prefs = anchor_addon_prefs[anchor_fam]
+            small_categories = ["CHAIRS","LAMPS","TEXTILES","KITCHENWARE","DECOR","STORAGE"]
+            
             for _ in range(addon_n):
-                items.append(int(np.random.choice(small_pool)))
+                # Each add-on: 95% chance of related category, 5% random (VERY STRONG BIAS!)
+                if np.random.rand() < 0.95:
+                    # Pick based on anchor preferences
+                    probs = [addon_prefs[cat] for cat in small_categories]
+                    probs_sum = sum(probs)
+                    probs = [p/probs_sum for p in probs]  # normalize
+                    chosen_cat = np.random.choice(small_categories, p=probs)
+                else:
+                    # Random category (minimal noise)
+                    chosen_cat = np.random.choice(small_categories)
+                
+                addon_pid = products[products.family==chosen_cat].sample(1).product_id.values[0]
+                items.append(addon_pid)
+            
+            # Impulse zone items at checkout (always present, STRONGLY biased)
+            impulse_families = ["DECOR","KITCHENWARE","LAMPS"]
+            impulse_count = np.random.choice([1,2], p=[0.7,0.3])  # Reduced to 1 more often
+            for _ in range(impulse_count):
+                # 90% bias toward anchor preferences for impulse items too!
+                if np.random.rand() < 0.90:
+                    impulse_probs = [addon_prefs.get(f, 0.3) for f in impulse_families]
+                    impulse_probs_sum = sum(impulse_probs)
+                    impulse_probs = [p/impulse_probs_sum for p in impulse_probs]
+                    impulse_fam = np.random.choice(impulse_families, p=impulse_probs)
+                else:
+                    impulse_fam = np.random.choice(impulse_families)
+                
+                impulse_pid = products[products.family==impulse_fam].sample(1).product_id.values[0]
+                items.append(impulse_pid)
         else:
             for _ in range(basket_size):
                 fam = np.random.choice(families, p=[0.04,0.05,0.05,0.05,0.15,0.18,0.2,0.12,0.1,0.06])
@@ -86,13 +185,35 @@ for d in range(days):
         for pid in items:
             qty = np.random.choice([1,2], p=[0.92,0.08])
             tx_rows.append([receipt_id, store_id, ts.isoformat(), lid, pid, qty])
-        # restaurant probability higher for anchor baskets
-        rest_prob = 0.28 if has_anchor else 0.14
+        
+        # Restaurant probability - make it LEARNABLE based on features!
+        # Base probability
+        if has_anchor:
+            rest_prob = 0.30  # base for anchor
+            # More items = more tired = more likely to eat
+            rest_prob += min(0.25, len(items) * 0.04)  # +0.04 per item, max +0.25
+            # Larger household = more likely to eat
+            hh_size = loyalty.loc[loyalty.loyalty_id==lid, 'household_size'].values[0]
+            rest_prob += min(0.15, (hh_size - 1) * 0.05)  # bigger families eat more
+            # Afternoon/evening = more likely to eat
+            if hour >= 14:  # after 2pm
+                rest_prob += 0.15
+            # Weekend = more likely to eat (leisure shopping)
+            if day.weekday() >= 5:
+                rest_prob += 0.10
+            # Cap at 0.85
+            rest_prob = min(0.85, rest_prob)
+        else:
+            rest_prob = 0.14  # baseline for non-anchor
+        
         if np.random.rand() < rest_prob:
+            # Restaurant visit happens AFTER shopping (30-180 min later)
+            rest_delay_min = np.random.randint(30, 181)
+            rest_ts = ts + timedelta(minutes=rest_delay_min)
             eat_items = np.random.choice(["MEATBALLS","VEG_BALLS","SALMON","KIDS","COFFEE","CINNAMON_BUN"], 
                                          size=np.random.choice([1,2,3], p=[0.6,0.3,0.1]), replace=True)
             value = np.random.uniform(6, 35)
-            rest_rows.append([order_id, store_id, ts.isoformat(), lid, ";".join(eat_items), round(value,2)])
+            rest_rows.append([order_id, store_id, rest_ts.isoformat(), lid, ";".join(eat_items), round(value,2)])
             order_id += 1
         receipt_id += 1
 
@@ -115,4 +236,23 @@ transactions.to_csv(out/"transactions.csv", index=False)
 restaurant.to_csv(out/"restaurant.csv", index=False)
 campaigns.to_csv(out/"campaigns.csv", index=False)
 
-print("Wrote CSVs to", out)
+print("✅ Wrote CSVs to", out)
+print(f"\n📊 Data Generation Summary:")
+print(f"   Total receipts: {receipt_id - 1}")
+print(f"   Total transactions: {len(tx_rows)}")
+print(f"   Total restaurant orders: {order_id - 1}")
+print(f"\n🔍 Sample anchor basket check:")
+print(f"   Expected BEDS→TEXTILES rate: ~82-85%")
+print(f"   Expected TABLES→CHAIRS rate: ~78-80%")
+print(f"   Expected SOFAS→LAMPS rate: ~72-75%")
+
+# Verify files were written
+import os
+csv_files = [f for f in os.listdir(out) if f.endswith('.csv')]
+print(f"\n📁 CSV files in {out}:")
+for f in csv_files:
+    file_path = out / f
+    size = os.path.getsize(file_path)
+    print(f"   {f}: {size:,} bytes")
+
+# COMMAND ----------
