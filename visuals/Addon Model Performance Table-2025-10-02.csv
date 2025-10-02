@@ -1,0 +1,7 @@
+Category,AUC,Accuracy,Precision,Recall,F1 Score,Lift (Top 20%),Performance Tier
+KITCHENWARE,0.718,0.774,0.769,0.774,0.771,2.14,Good
+CHAIRS,0.699,0.719,0.517,0.719,0.602,1.81,Acceptable
+LAMPS,0.662,0.656,0.686,0.656,0.633,1.24,Acceptable
+TEXTILES,0.647,0.63,0.617,0.63,0.612,1.41,Needs Improvement
+DECOR,0.608,0.623,0.388,0.623,0.479,1.36,Needs Improvement
+STORAGE,0.5,0.739,0.547,0.739,0.629,1.02,Needs Improvement

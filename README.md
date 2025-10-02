@@ -4,6 +4,8 @@
 
 This is a complete end-to-end Lakehouse demo showcasing modern data engineering practices for retail analytics.
 
+![Dashboard Demo](visuals/GIF.gif)
+
 ##  Business Context
 
 In IKEA's business model, **cross-selling is the primary revenue driver**:
@@ -108,22 +110,53 @@ Both models use **behavioral features only** (no PII) - they predict based on sh
 ##  Dashboard Queries
 
 ### Dashboard 1: Revenue Breakdown
-- KPIs: Total revenue, % from add-ons, avg basket value
-- Charts: Daily revenue waterfall, margin contribution by size
+![Revenue Overview](visuals/first-image.png)
+
+Provides executive-level view of IKEA's cross-selling performance:
+- **KPIs**: Anchor revenue (kr 160.1M), add-on revenue (kr 99.3M), total revenue (kr 259.7M)
+- **Key Insight**: 38.3% of revenue comes from add-ons - the primary profit driver
+- **Charts**: Daily revenue trends (anchor vs add-on), margin contribution by size class, average basket value comparison
 
 ### Dashboard 2: Cross-Sell Matrix
-- Heatmap: Which anchors drive which add-ons (lift scores)
-- Table: Top 10 add-ons per anchor family
+![Anchor vs Add-on Lift Heatmap](visuals/Anchor%20vs%20Add-on%20Lift%20Heatmap.png)
+![Attach Rate by Anchor Family](visuals/Attach%20Rate%20by%20Anchor%20Family.png)
+![Attach Rate Trend](visuals/Attach%20Rate%20Trend%20Over%20Time.png)
+
+Analyzes which anchor purchases drive specific add-on categories:
+- **Heatmap**: Lift scores showing cross-selling patterns (e.g., TABLES → KITCHENWARE: 2.07x lift, WARDROBES → STORAGE: 2.18x lift)
+- **Attach Rates**: Overall attach rate performance by anchor family (SOFAS: 92.2%, TABLES: 91.8%, BEDS: 91.8%, WARDROBES: 91.4%)
+- **Trends**: Attach rate over time by anchor family showing consistency and patterns
+- **Business Use**: Identify high-value cross-selling opportunities for staff recommendations and promotions
 
 ### Dashboard 3: Impulse Categories
-- Focus on DECOR, KITCHENWARE, LAMPS (checkout zone)
-- Attachment rate by hour (tired shoppers buy more)
-- Basket diversity analysis
+![Impulse Attach Rate by Hour](visuals/Impulse%20Attach%20Rate%20by%20Hour.png)
 
-### Dashboard 4: Restaurant Upsell
-- Conversion trend over time
-- Average spend: anchor vs non-anchor customers
-- Time distribution (when do people eat after shopping?)
+Focuses on checkout zone items (DECOR, KITCHENWARE, LAMPS):
+- **Key Finding**: Attachment rates vary significantly by hour - tired shoppers in afternoon/evening buy more impulse items
+- **Charts**: Impulse category attach rates by time of day, basket diversity analysis
+- **Business Use**: Optimize checkout zone merchandising and staffing based on peak impulse buying hours
+
+### Dashboard 4: Restaurant Conversion & Upsell
+![Restaurant Model Performance](visuals/Restaurant%20Propensity%20Model%20Performance%20for%20Conversion%20Rate.png)
+![Restaurant Timing](visuals/Time%20Between%20Restaurant%20Visit%20and%20Checkout_.png)
+
+Tracks how anchor purchases drive restaurant visits:
+- **Conversion Model**: ML model calibration showing predicted vs actual restaurant visit rates with strong alignment
+- **Timing Analysis**: 37% of customers visit restaurant 61-180 minutes before checkout (mid-shopping when tired)
+- **Business Use**: Target high-propensity customers at checkout with restaurant coupons, optimize restaurant capacity planning
+
+### Dashboard 5: ML Model Performance
+![Propensity Score Distribution](visuals/Propensity%20Score%20Distribution.png)
+![Category Model AUC Comparison](visuals/Category%20Model%20AUC%20Comparison.png)
+![Add-on Recommendations](visuals/visualization.png)
+![Add-on Model Performance](visuals/Add-on%20Model%20Performance%20Table.png)
+
+Demonstrates ML model effectiveness for personalized recommendations:
+- **Restaurant Propensity Model**: Distribution shows clear segmentation from low to high likelihood customers (0.05-0.8 range)
+- **Add-on Category Models**: AUC scores by category showing model performance (CHAIRS, DECOR, KITCHENWARE, LAMPS, STORAGE, TEXTILES)
+- **Top Recommendations by Anchor**: BEDS → LAMPS (65%), SOFAS → LAMPS (64%), TABLES → KITCHENWARE (59%), WARDROBES → LAMPS (55%)
+- **Model Metrics Table**: Detailed performance metrics including AUC, accuracy, precision, recall, and F1 scores for each category model
+- **Business Use**: Enable targeted promotions and personalized recommendations based on customer propensity scores
 
 ##  Architecture Highlights
 

@@ -1,0 +1,7 @@
+Performance Tier,sum(AUC),Category
+Good,0.718,KITCHENWARE
+Acceptable,0.699,CHAIRS
+Acceptable,0.662,LAMPS
+Needs Improvement,0.647,TEXTILES
+Needs Improvement,0.608,DECOR
+Needs Improvement,0.5,STORAGE
