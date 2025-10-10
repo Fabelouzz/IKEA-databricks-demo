@@ -1,0 +1,51 @@
+# Metadata-driven join configuration - SIMPLIFIED
+# 3 clean joins, no window functions, no self-joins
+
+base:
+  table: silver.dim_products_api
+  alias: base
+  select: 
+    - product_id
+    - title
+    - category
+    - brand
+    - price
+    - stock
+    - rating
+    - size_class
+  filter: "price > 0 AND stock > 0"
+
+joins:
+  # Join 1: Customer demographics
+  - table: silver.dim_customers_api
+    alias: cust
+    type: left
+    "on": "base.product_id % 208 = cust.customer_id"
+    select:
+      - customer_id
+      - customer_name
+      - age
+      - gender
+    broadcast: true
+    
+  # Join 2: FX rates (EUR to SEK)
+  - table: silver.fx_rates_daily
+    alias: fx_sek
+    type: left
+    "on": "base.product_id % 30 = DAY(fx_sek.as_of_date) AND fx_sek.pair = 'EUR/SEK'"
+    select:
+      - rate
+    broadcast: false
+    
+  # Join 3: FX rates (EUR to USD)
+  - table: silver.fx_rates_daily
+    alias: fx_usd
+    type: left
+    "on": "base.product_id % 30 = DAY(fx_usd.as_of_date) AND fx_usd.pair = 'EUR/USD'"
+    select:
+      - rate
+    broadcast: false
+
+output:
+  table: gold.products_analytics_simple
+  mode: overwrite

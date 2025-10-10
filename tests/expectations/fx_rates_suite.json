@@ -1,0 +1,80 @@
+{
+  "expectation_suite_name": "fx_rates_daily_quality",
+  "data_asset_type": "Dataset",
+  "meta": {
+    "great_expectations_version": "0.18.0",
+    "description": "Quality expectations for silver.fx_rates_daily table"
+  },
+  "expectations": [
+    {
+      "expectation_type": "expect_column_values_to_not_be_null",
+      "kwargs": {
+        "column": "pair"
+      },
+      "meta": {
+        "description": "Pair is part of composite primary key and must never be null"
+      }
+    },
+    {
+      "expectation_type": "expect_column_values_to_not_be_null",
+      "kwargs": {
+        "column": "as_of_date"
+      },
+      "meta": {
+        "description": "Date is part of composite primary key and must never be null"
+      }
+    },
+    {
+      "expectation_type": "expect_column_values_to_be_between",
+      "kwargs": {
+        "column": "rate",
+        "min_value": 0.01,
+        "max_value": 1000.0,
+        "mostly": 1.0
+      },
+      "meta": {
+        "description": "FX rates should be positive and within reasonable bounds (0.01 to 1000)"
+      }
+    },
+    {
+      "expectation_type": "expect_column_values_to_match_regex",
+      "kwargs": {
+        "column": "pair",
+        "regex": "^[A-Z]{3}/[A-Z]{3}$"
+      },
+      "meta": {
+        "description": "Pair format should be ISO currency codes separated by slash (e.g., EUR/SEK)"
+      }
+    },
+    {
+      "expectation_type": "expect_compound_columns_to_be_unique",
+      "kwargs": {
+        "column_list": ["pair", "as_of_date"]
+      },
+      "meta": {
+        "description": "Composite primary key (pair, as_of_date) must be unique"
+      }
+    },
+    {
+      "expectation_type": "expect_table_row_count_to_be_between",
+      "kwargs": {
+        "min_value": 1,
+        "max_value": 1000000
+      },
+      "meta": {
+        "description": "Table should have a reasonable number of rows"
+      }
+    },
+    {
+      "expectation_type": "expect_column_values_to_be_of_type",
+      "kwargs": {
+        "column": "rate",
+        "type_": "DoubleType"
+      },
+      "meta": {
+        "description": "Rate must be a double/float type for precision"
+      }
+    }
+  ]
+}
+

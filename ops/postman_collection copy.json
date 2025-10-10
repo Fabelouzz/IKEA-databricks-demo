@@ -1,0 +1,146 @@
+{
+  "info": {
+    "name": "IKEA Demo - API Validation",
+    "description": "API validation collection for DummyJSON and Frankfurter endpoints",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "DummyJSON - GET Products (Pagination)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "https://dummyjson.com/products?limit=10&skip=0",
+          "protocol": "https",
+          "host": ["dummyjson", "com"],
+          "path": ["products"],
+          "query": [
+            {
+              "key": "limit",
+              "value": "10",
+              "description": "Number of products per page"
+            },
+            {
+              "key": "skip",
+              "value": "0",
+              "description": "Number of products to skip (offset)"
+            }
+          ]
+        },
+        "description": "Fetch products with pagination using limit and skip parameters. Demonstrates GET request with query parameters for pagination."
+      },
+      "response": []
+    },
+    {
+      "name": "DummyJSON - GET Products Search",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "https://dummyjson.com/products/search?q=phone&limit=10&skip=0",
+          "protocol": "https",
+          "host": ["dummyjson", "com"],
+          "path": ["products", "search"],
+          "query": [
+            {
+              "key": "q",
+              "value": "phone",
+              "description": "Search term"
+            },
+            {
+              "key": "limit",
+              "value": "10",
+              "description": "Number of results to return"
+            },
+            {
+              "key": "skip",
+              "value": "0",
+              "description": "Number of results to skip (pagination)"
+            }
+          ]
+        },
+        "description": "Search products using GET with query parameters. Returns products matching the search term with pagination support."
+      },
+      "response": []
+    },
+    {
+      "name": "DummyJSON - GET Users (Pagination)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "https://dummyjson.com/users?limit=10&skip=0",
+          "protocol": "https",
+          "host": ["dummyjson", "com"],
+          "path": ["users"],
+          "query": [
+            {
+              "key": "limit",
+              "value": "10"
+            },
+            {
+              "key": "skip",
+              "value": "0"
+            }
+          ]
+        },
+        "description": "Fetch users with pagination. Same pattern as products endpoint."
+      },
+      "response": []
+    },
+    {
+      "name": "Frankfurter - GET FX Rates (Date Range)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "https://api.frankfurter.app/2024-01-01..2024-01-10?from=EUR&to=SEK,USD",
+          "protocol": "https",
+          "host": ["api", "frankfurter", "app"],
+          "path": ["2024-01-01..2024-01-10"],
+          "query": [
+            {
+              "key": "from",
+              "value": "EUR",
+              "description": "Base currency"
+            },
+            {
+              "key": "to",
+              "value": "SEK,USD",
+              "description": "Quote currencies (comma-separated)"
+            }
+          ]
+        },
+        "description": "Fetch FX rates for a date range. Demonstrates time-series data ingestion with date ranges in URL path."
+      },
+      "response": []
+    },
+    {
+      "name": "Frankfurter - GET Latest Rates",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "https://api.frankfurter.app/latest?from=EUR&to=SEK,USD",
+          "protocol": "https",
+          "host": ["api", "frankfurter", "app"],
+          "path": ["latest"],
+          "query": [
+            {
+              "key": "from",
+              "value": "EUR"
+            },
+            {
+              "key": "to",
+              "value": "SEK,USD"
+            }
+          ]
+        },
+        "description": "Fetch latest FX rates. Simple endpoint for current exchange rates."
+      },
+      "response": []
+    }
+  ]
+}
+

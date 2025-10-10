@@ -1,3 +1,16 @@
 pyspark==3.5.0
 databricks-connect==14.3.13
 
+# API ingestion dependencies
+requests>=2.31.0
+retrying>=1.3.4
+pyyaml>=6.0.1
+
+# Testing dependencies
+pytest>=7.4.0
+chispa>=0.9.4
+pytest-cov>=4.1.0
+
+# Optional: Data quality framework
+# great-expectations>=0.18.0
+
