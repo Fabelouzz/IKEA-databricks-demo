@@ -20,7 +20,48 @@ This demo uses **synthetic data biased toward real IKEA patterns**:
 - 50% of anchor customers visit the restaurant (vs 14% baseline)
 - Impulse categories (DECOR, KITCHENWARE, LAMPS) show strong attachment
 
-##  What You Get
+---
+
+## 🔧 Separate Demo: Advanced Data Engineering Patterns
+
+**This repository includes a SECOND, independent demo** showcasing production-ready data engineering patterns using external APIs (DummyJSON, Frankfurter). This is **not related to the IKEA business case** - it's a technical demonstration of Databricks capabilities.
+
+### What's Included
+
+This demo covers:
+- **API Integration**: REST API ingestion with retry logic and pagination
+- **Metadata-Driven Joins**: YAML-based configuration for scalable join pipelines
+- **Delta Governance**: Time travel, audit trails, and rollback patterns
+- **Performance Tuning**: Skew mitigation and broadcast optimization with measurable results
+- **BI Engineering**: Dashboard queries that visualize technical metrics (not just business KPIs)
+- **Testing**: Unit tests with pytest, schema validation, and data quality checks
+
+### How to Run (Step-by-Step)
+
+Run these notebooks **after completing the IKEA demo** (or independently):
+
+1. **API Testing** (Optional): Import `ops/postman_collection.json` into Postman to test API endpoints
+2. **API Ingestion**: Run `notebooks/07_ingest_api_data.py` - fetches data from DummyJSON and Frankfurter APIs
+3. **API Transformation**: Run `notebooks/08_silver_api_transform.sql` - transforms API data into silver layer
+4. **Metadata Joins**: Run `notebooks/09_metadata_joins.py` - demonstrates YAML-driven join pipeline
+5. **Delta Governance**: Run `notebooks/10_delta_time_travel.py` - time travel and audit trail examples
+6. **Performance Tuning**: Run `notebooks/11_perf_skew_broadcast_ENHANCED.py` - skew detection and optimization
+7. **BI Engineering**: Execute queries from `notebooks/12_bi_concepts_demo.sql` in Databricks SQL
+8. **Lineage Diagram**: Run `notebooks/13_generate_join_diagram.py` - generates Mermaid diagrams from YAML config
+
+### Testing (Local Development)
+
+```bash
+cd tests/
+pip install -r ../requirements.txt
+pytest test_transforms.py -v --cov=. --cov-report=term-missing
+```
+
+**13 unit tests** covering FX rates, product transformations, customer enrichment, and metadata-driven joins.
+
+---
+
+##  What You Get (IKEA Demo)
 
 1. **Synthetic datasets** for 60 days of activity for a single store
 2. **PySpark notebooks** for Bronze → Silver → Gold (Lakehouse pattern)
@@ -28,13 +69,14 @@ This demo uses **synthetic data biased toward real IKEA patterns**:
    - Restaurant propensity (predict who will eat)
    - Add-on category recommendations (predict which categories to promote)
 4. **dbt models and tests** for data quality on key tables
-5. **Four dashboard query sets** for Databricks SQL:
+5. **Five dashboard query sets** for Databricks SQL:
    - Revenue breakdown (shows add-ons drive profit)
    - Cross-sell matrix (anchor × add-on lift scores)
    - Impulse category performance (checkout zone items)
    - Restaurant conversion and upsell
+   - ML model performance metrics
 
-##  Quickstart on Databricks
+##  Quickstart on Databricks (IKEA Demo)
 
 ### Step 1: Generate Data
 1. Create a new Repo and upload the contents of this project
@@ -52,9 +94,11 @@ This demo uses **synthetic data biased toward real IKEA patterns**:
 
 ### Step 4: Create Dashboards
 8. Open `sql/dashboard_01_revenue_breakdown.sql` and create visualizations in Databricks SQL
-9. Repeat for `dashboard_02_cross_sell_matrix.sql`, `dashboard_03_impulse_categories.sql`, `dashboard_04_restaurant_upsell.sql`
+9. Repeat for `dashboard_02_cross_sell_matrix.sql`, `dashboard_03_impulse_categories.sql`, `dashboard_04_restaurant_upsell.sql`, `dashboard_05_ml_performance.sql`
 
 ##  Lakehouse Layout
+
+### IKEA Demo Tables
 
 ```
 bronze.*
@@ -77,6 +121,21 @@ gold.*
   restaurant_propensity_scores    # ML predictions (from notebook 05)
   addon_propensity_model_performance  # ML model metrics (from notebook 06)
   addon_recommendations     # Top add-on categories by anchor type
+```
+
+### Engineering Patterns Demo Tables (Notebooks 07-13)
+
+```
+bronze.*
+  api_products              # External products from DummyJSON API
+  api_customers             # External customers from DummyJSON API
+  api_fx_rates              # FX rates from Frankfurter API (EUR/SEK, EUR/USD)
+
+silver.*
+  dim_products_api          # Enriched API products with size classification
+  dim_customers_api         # Enriched API customers with full_name
+  fx_rates_daily            # Deduplicated FX rates with composite key
+  baskets_enriched          # Join output: products + customers + FX (metadata-driven)
 ```
 
 ##  Key Metrics (KPIs)
@@ -160,15 +219,24 @@ Demonstrates ML model effectiveness for personalized recommendations:
 
 ##  Architecture Highlights
 
+### IKEA Demo Architecture
 - **Lakehouse pattern**: Bronze (raw) → Silver (clean) → Gold (analytics)
-- **Delta Lake**: ACID transactions, time travel, schema enforcement
+- **Delta Lake**: ACID transactions, schema enforcement
 - **PySpark**: Scalable data transformations
 - **dbt**: Data quality tests and documentation
 - **MLflow**: Model tracking, versioning, and deployment
 - **Databricks SQL**: Interactive dashboards and BI
 
+### Engineering Patterns Demo (Notebooks 07-13)
+- **API Integration**: REST API ingestion with retry logic, pagination, explicit schemas
+- **Metadata-Driven**: YAML-based configuration for joins, self-documenting with auto-generated diagrams
+- **Delta Governance**: Full audit history, time travel (version/timestamp), rollback capabilities
+- **Performance Tuning**: Broadcast joins, skew mitigation with salt keys, AQE optimization
+- **Data Quality**: Unit testing with pytest, Great Expectations integration, schema validation
+- **DevOps Ready**: Postman collections, test coverage reporting, CI/CD patterns
+
 
 
 ---
 
-**Technologies**: Databricks, PySpark, Delta Lake, dbt, MLflow, SQL, Python, Pandas, NumPy
+**Technologies**: Databricks, PySpark, Delta Lake, dbt, MLflow, SQL, Python, Pandas, NumPy, pytest, Great Expectations, REST APIs, YAML, Postman, Mermaid

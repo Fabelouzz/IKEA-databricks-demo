@@ -201,6 +201,9 @@ temp/
 # CUSTOM / PROJECT SPECIFIC
 # ============================================
 
+# Documentation (personal notes, not for repo)
+docs/
+
 # Any file with 'private' in the name
 *private*
 *PRIVATE*
